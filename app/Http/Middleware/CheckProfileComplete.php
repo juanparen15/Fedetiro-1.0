@@ -14,36 +14,90 @@ class CheckProfileComplete
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+    // public function handle(Request $request, Closure $next): Response
+    // {
+    //     $user = Auth::user();
+
+    //     // Obtener el nombre de la ruta actual
+    //     $currentRoute = $request->route()->getName();
+
+    //     // Excluir archivos estáticos como CSS, JS, imágenes, etc.
+    //     if ($request->is('voyager/*') || $request->is('storage/*') || $this->isStaticFile($request)) {
+    //         return $next($request);
+    //     }
+
+    //     // Permitir solicitudes AJAX y la página de edición de perfil
+    //     if (
+    //         $user && $user->hasVerifiedEmail() && !$this->profileCompleted($user) &&
+    //         !$request->ajax() &&
+    //         $currentRoute !== 'voyager.users.edit' &&
+    //         $currentRoute !== 'voyager.users.update' // Permitir también la actualización del perfil
+    //     ) {
+    //         // Obtiene el ID del usuario autenticado
+    //         $userId = Auth::id();
+
+    //         // Redireccionar a la página de edición del usuario autenticado
+    //         return redirect()->route('voyager.users.edit', $userId)->with('message', 'Por favor, completa tu perfil antes de continuar.');
+    //     }
+
+    //     return $next($request);
+    // }
+
+    // private function isStaticFile($request)
+    // {
+    //     $path = $request->path();
+    //     $extension = pathinfo($path, PATHINFO_EXTENSION);
+    //     $staticExtensions = ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'woff', 'woff2', 'ttf', 'eot'];
+
+    //     return in_array($extension, $staticExtensions);
+    // }
+
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
 
         // Obtener el nombre de la ruta actual
-        $currentRoute = $request->route()->getName();
+        $currentRoute = $request->route() ? $request->route()->getName() : null;
 
-        // Permitir solicitudes AJAX y la página de edición de perfil
+        // Si el usuario está autenticado, tiene el correo verificado y el perfil incompleto
         if (
-            $user && $user->hasVerifiedEmail() && !$this->profileCompleted($user) &&
-            !$request->ajax() &&
-            $currentRoute !== 'voyager.users.edit' &&
-            $currentRoute !== 'voyager.users.update' // Permitir también la actualización del perfil
+            $user &&
+            $user->hasVerifiedEmail() &&
+            !$this->profileCompleted($user)  &&
+            !$request->ajax()
         ) {
-            // Obtiene el ID del usuario autenticado
-            $userId = Auth::id();
+            // Si la ruta es la de edición, permitir el acceso sin redirección adicional
+            if (in_array($currentRoute, $this->allowedRoutes())) {
+                return $next($request);
+            }
 
-            // Redireccionar a la página de edición del usuario autenticado
-            return redirect()->route('voyager.users.edit', $userId)->with('message', 'Por favor, completa tu perfil antes de continuar.');
+            // Si el usuario intenta acceder a otra ruta, redirigir a la página de edición
+            return redirect()->route('voyager.users.edit', $user->id)
+                ->with('message', 'Por favor, completa tu perfil antes de continuar.');
         }
 
+        // Continuar con la petición si el perfil está completo
         return $next($request);
     }
 
+    /**
+     * Rutas permitidas donde no se requiere verificar el perfil.
+     */
+    private function allowedRoutes()
+    {
+        return [
+            'voyager.users.edit',   // Ruta de edición de usuario
+            'voyager.users.update', // Ruta de actualización de perfil
+            'voyager.voyager_assets',
+            'voyager.logout',
+        ];
+    }
+    
     private function profileCompleted($user)
     {
         // Lógica para verificar si el perfil del usuario está completo
-        // Verificar cada campo requerido
         return !is_null($user->primer_nombre) &&
-            !is_null($user->primer_apellido);
+            !is_null($user->primer_apellido) &&
             !is_null($user->movil) &&
             !is_null($user->direccion) &&
             !is_null($user->fecha_nacimiento) &&
