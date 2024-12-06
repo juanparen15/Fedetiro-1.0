@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Request;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
@@ -75,31 +76,58 @@ class User extends \TCG\Voyager\Models\User implements MustVerifyEmail
     {
         return $this->belongsTo(Club::class, 'club');
     }
-    
+
     public function Liga()
     {
         return $this->belongsTo(Liga::class, 'liga');
     }
 
+    // protected static function boot()
+    // {
+    //     parent::boot();
+
+    //     // Utiliza el evento creating para establecer el campo documento_tercero
+    //     static::creating(function ($user) {
+    //         // Establece el valor del campo documento_tercero como el nombre de usuario del usuario
+    //         $user->documento_tercero = $user->username;
+    //     });
+
+    //     // Utiliza el evento creating para establecer el campo documento_tercero
+    //     static::updating(function ($user) {
+    //         // Establece el valor del campo documento_tercero como el nombre de usuario del usuario
+    //         $user->documento_tercero = $user->username;
+    //     });
+    // }
+
     protected static function boot()
-    {
-        parent::boot();
+{
+    parent::boot();
 
-        // Utiliza el evento creating para establecer el campo documento_tercero
-        static::creating(function ($user) {
-            // Establece el valor del campo documento_tercero como el nombre de usuario del usuario
+    // Utiliza el evento creating para establecer el campo documento_tercero
+    static::creating(function ($user) {
+        // Si el usuario autenticado NO es administrador, establece el valor del campo documento_tercero como el nombre de usuario
+        if (!auth()->user() || !auth()->user()->is_admin) {
             $user->documento_tercero = $user->username;
-        });
+        }
+    });
 
-        // Utiliza el evento creating para establecer el campo documento_tercero
-        static::updating(function ($user) {
-            // Establece el valor del campo documento_tercero como el nombre de usuario del usuario
+    // Utiliza el evento updating para evitar que el administrador modifique el campo documento_tercero
+    static::updating(function ($user) {
+        // Si el usuario autenticado es administrador, no modificar ni borrar el campo documento_tercero
+        if (!auth()->user() || !auth()->user()->is_admin) {
             $user->documento_tercero = $user->username;
-        });
-    }
+        }
+    });
+}
+
 
     public function getAgeAttribute()
     {
         return Carbon::parse($this->fecha_nacimiento)->age;
+    }
+
+    protected function credentials(Request $request)
+    {
+        return array_merge($request->only($this->username(), 'password'), ['isActive' => true]);
     }
 }

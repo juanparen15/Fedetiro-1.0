@@ -14,44 +14,6 @@ class CheckProfileComplete
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    // public function handle(Request $request, Closure $next): Response
-    // {
-    //     $user = Auth::user();
-
-    //     // Obtener el nombre de la ruta actual
-    //     $currentRoute = $request->route()->getName();
-
-    //     // Excluir archivos estáticos como CSS, JS, imágenes, etc.
-    //     if ($request->is('voyager/*') || $request->is('storage/*') || $this->isStaticFile($request)) {
-    //         return $next($request);
-    //     }
-
-    //     // Permitir solicitudes AJAX y la página de edición de perfil
-    //     if (
-    //         $user && $user->hasVerifiedEmail() && !$this->profileCompleted($user) &&
-    //         !$request->ajax() &&
-    //         $currentRoute !== 'voyager.users.edit' &&
-    //         $currentRoute !== 'voyager.users.update' // Permitir también la actualización del perfil
-    //     ) {
-    //         // Obtiene el ID del usuario autenticado
-    //         $userId = Auth::id();
-
-    //         // Redireccionar a la página de edición del usuario autenticado
-    //         return redirect()->route('voyager.users.edit', $userId)->with('message', 'Por favor, completa tu perfil antes de continuar.');
-    //     }
-
-    //     return $next($request);
-    // }
-
-    // private function isStaticFile($request)
-    // {
-    //     $path = $request->path();
-    //     $extension = pathinfo($path, PATHINFO_EXTENSION);
-    //     $staticExtensions = ['css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'woff', 'woff2', 'ttf', 'eot'];
-
-    //     return in_array($extension, $staticExtensions);
-    // }
-
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
@@ -75,7 +37,7 @@ class CheckProfileComplete
             return redirect()->route('voyager.users.edit', $user->id)
                 ->with('message', 'Por favor, completa tu perfil antes de continuar.');
         }
-
+        
         // Continuar con la petición si el perfil está completo
         return $next($request);
     }

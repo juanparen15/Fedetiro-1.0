@@ -10,6 +10,50 @@ use TCG\Voyager\Facades\Voyager;
 class VoyagerUserController extends VoyagerBaseController
 {
 
+    // public function toggleActive(Request $request)
+    // {
+    //     try {
+    //         $user = User::findOrFail($request->id);
+    //         $user->isActive = $request->isActive;
+    //         $user->save();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Estado del usuario actualizado correctamente.'
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Error al actualizar el estado del usuario.'
+    //         ]);
+    //     }
+    // }
+
+    public function toggleActive(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:users,id',
+            'isActive' => 'required|boolean',
+        ]);
+    
+        $user = User::find($request->id);
+    
+        if ($user) {
+            $user->isActive = $request->isActive;
+            $user->save();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado actualizado correctamente.'
+            ]);
+        }
+    
+        return response()->json([
+            'success' => false,
+            'message' => 'No se pudo actualizar el estado.'
+        ], 400);
+    }
+    
     public function profile(Request $request)
     {
         $route = '';
@@ -27,12 +71,12 @@ class VoyagerUserController extends VoyagerBaseController
     {
         // Obtiene el ID del usuario autenticado
         $userId = Auth::id();
-    
+
         // Redireccionar a la página de edición del usuario autenticado
         return redirect()->route('voyager.users.edit', $userId);
     }
 
-    
+
     // public function store(Request $request)
     // {
     //     // Guardar el usuario
@@ -64,7 +108,10 @@ class VoyagerUserController extends VoyagerBaseController
         // Actualizar los datos del usuario
         // $user->update($request->all());
         // Obtener los datos del formulario
+        if (!auth()->user()) {
         $user->documento_tercero = $user->username;
+        }
+
         $formData = $request->all();
         $user->save();
 

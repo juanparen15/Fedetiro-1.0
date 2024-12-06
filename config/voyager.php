@@ -14,7 +14,7 @@ return [
         'add_default_role_on_register' => true,
         'default_role'                 => 'user',
         'default_avatar'               => 'users/default.png',
-        'redirect'                     => '/admin',
+        'redirect'                     => '/admin/edit-profile',
     ],
 
     /*
@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'hidden_files' => true,
+    'hidden_files' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -199,6 +199,8 @@ return [
         // 'js/custom.js',
         // 'resources/js/app.js',
     ],
+
+    'assets_path' => '/vendor/tcg/voyager/publishable/assets',
 
     'googlemaps' => [
         'key'    => env('GOOGLE_MAPS_KEY', ''),

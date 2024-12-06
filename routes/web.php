@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Voyager\InscripcionController;
 use App\Http\Middleware\AllowPublicAccess;
@@ -36,7 +37,7 @@ Route::post('/email/verification-notification', 'App\Http\Controllers\Auth\Verif
     ->name('verification.send');
 
 // Dashboard route requires authentication and email verification
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified', 'check_active'])->group(function () {
     Route::get('/admin', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -49,7 +50,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
 // Define las rutas de Voyager con middleware
 Route::group(['prefix' => 'admin'], function () {
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware(['auth', 'verified', 'check_active'])->group(function () {
         Voyager::routes();
     });
 });
@@ -61,3 +62,10 @@ Route::get('/get-modalidades/{tipo_arma}', 'TCG\Voyager\Http\Controllers\AjaxCon
 Route::get('/get-modalidades-by-evento/{codigo_evento}', 'TCG\Voyager\Http\Controllers\AjaxController@getModalidadesByEvento');
 Route::post('/get-valor-inscripcion', [InscripcionController::class, 'getValorInscripcion']);
 Route::get('inscripciones/{id}/detalle', [App\Http\Controllers\Voyager\InscripcionController::class, 'detalle'])->name('inscripciones.detalle');
+
+    Route::post('users/toggle-active', [TCG\Voyager\Http\Controllers\VoyagerUserController::class, 'toggleActive'])
+    ->name('voyager.users.toggleActive');
+
+
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);

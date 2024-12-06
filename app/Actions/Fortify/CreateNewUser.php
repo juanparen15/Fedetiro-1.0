@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Notifications\CustomVerifyEmailNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -34,15 +35,15 @@ class CreateNewUser implements CreatesNewUsers
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
         ])->validate();
 
-        $user = User::create([
+        return User::create([
             'tipo_documento' => $input['tipo_documento'],
             'username' => $input['username'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
         ]);
 
-        event(new Registered($user));
+        // event(new Registered($user));
 
-        return $user;
+        // return $user;
     }
 }

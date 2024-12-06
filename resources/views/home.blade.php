@@ -1188,7 +1188,7 @@
                         <p class="mb-0">©
                             <script>
                                 document.write(new Date().getFullYear())
-                            </script> Fedetiro. Hecho con <i class="mdi mdi-heart text-red-600"></i> por
+                            </script> Fedetiro. Hecho en Boyacá-Colombia por
                             <a href="https://armorumsgdea.net" target="_blank" class="text-reset">ARMORUM VU-SGDEA
                                 ®</a>
                         </p>
