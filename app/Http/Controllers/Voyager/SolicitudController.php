@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Voyager;
 
 use App\Mail\solicitud_recibida;
+use App\Models\ArmorumappInfodeportistum;
 use App\Models\ArmorumappSolicitud;
 use App\Notifications\SolicitudRecibida;
 use App\Models\User;
@@ -86,8 +87,21 @@ class SolicitudController extends VoyagerBaseController
             $solicitud->otro_archivo = $file->storeAs($directory, $fileName, 'public');
         }
 
+        $info_deportista = ArmorumappInfodeportistum::where('documento_tercero', $user->username)->first();
+
+        // Verificar si la información del deportista existe
+        if ($info_deportista === null) {
+            // Puedes registrar el error o asignar un valor por defecto
+            Log::warning('No se encontró la información del deportista para el usuario: ' . $user->username);
+            // Asignar un valor predeterminado (vacío o un objeto vacío)
+            $info_deportista = new ArmorumappInfodeportistum();
+        }
+
+        $adminEmail = Voyager::setting('admin.correo', 'deseosecreto92@gmail.com');
+
         try {
-            Mail::to($user->email)->send(new solicitud_recibida($solicitud, $user));
+            Mail::to($adminEmail)->send(new solicitud_recibida($solicitud, $user, $info_deportista));
+            Mail::to($user->email)->send(new solicitud_recibida($solicitud, $user, $info_deportista));
         } catch (\Exception $e) {
             // Registra el error en los logs
             Log::error('Error al enviar el correo: ' . $e->getMessage(), ['exception' => $e]);

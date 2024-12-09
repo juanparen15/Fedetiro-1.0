@@ -20,6 +20,8 @@ Se ha recepcionado a través de la Ventanilla Única Virtual una solicitud con l
 - Móvil: {{ $usuario->movil }}
 - Dirección: {{ $usuario->direccion }}
 - Ciudad: {{ $usuario->Municipios->municipio }}
+- Valor a pagar antes del {{ $info_deportista->fecha_antes ?? '' }}: ${{ $info_deportista->valor_pagar_antes ?? '' }}
+- Valor a pagar a partir del {{ $info_deportista->fecha_despues ?? '' }}: ${{ $info_deportista->valor_apagar_despues ?? '' }}
 
 Saludos,<br>
 {{ config('app.name') }}

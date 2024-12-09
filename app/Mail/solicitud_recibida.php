@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\ArmorumappInfodeportistum;
 use App\Models\ArmorumappSolicitud;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -21,15 +22,18 @@ class solicitud_recibida extends Mailable
 
     public $solicitud;
     public $usuario;
+    public $info_deportista;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(ArmorumappSolicitud $solicitud, User $usuario)
+    public function __construct(ArmorumappSolicitud $solicitud, User $usuario, ArmorumappInfodeportistum $info_deportista)
     {
         $this->solicitud = $solicitud;
         $this->usuario = $usuario;
+        $this->info_deportista = $info_deportista;
     }
+    
 
 
     /**
@@ -40,7 +44,7 @@ class solicitud_recibida extends Mailable
     public function build()
     {
 
-        $mailMessage = $this->subject('SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . $this->usuario->movil . ')')
+        $mailMessage = $this->subject('SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . '$' . $this->info_deportista->valor_consignado . ')')
             ->markdown('emails.solicitud-recibida')
             ->withAttachments($this->attachments());
 
@@ -53,7 +57,7 @@ class solicitud_recibida extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . $this->usuario->movil . ')',
+            subject: 'SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . '$' . $this->info_deportista->valor_consignado . ')',
         );
     }
 
