@@ -44,7 +44,7 @@ class solicitud_recibida extends Mailable
     public function build()
     {
 
-        $mailMessage = $this->subject('SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . '$' . $this->info_deportista->valor_consignado . ')')
+        $mailMessage = $this->subject('SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . '$' . $this->solicitud->valor_consignado . ')')
             ->markdown('emails.solicitud-recibida')
             ->withAttachments($this->attachments());
 
@@ -57,7 +57,7 @@ class solicitud_recibida extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . '$' . $this->info_deportista->valor_consignado . ')',
+            subject: 'SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . '$' . $this->solicitud->valor_consignado . ')',
         );
     }
 
