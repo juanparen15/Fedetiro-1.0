@@ -41,6 +41,11 @@
                         @endif
 
                         <div class="panel-body">
+                            <div class="form-group">
+                                <a target="blank" type="button" class="btn btn-primary float-right"
+                                    href="https://checkout.wompi.co/l/0vsdUZ"><i class="voyager-paypal"></i> PAGOS EN
+                                    LINEA</a>
+                            </div>
                             @php
                                 $tipoPeticiones = Voyager::tipo_peticion();
                             @endphp
@@ -168,10 +173,16 @@
                                 </div>
                             </div> --}}
 
+                            <div class="form-group">
+                                <h5 for="valor_consignado">{{ __('Valor Consignado') }}</h5>
+                                <input type="text" class="form-control" id="valor_consignado" name="valor_consignado"
+                                    placeholder="{{ __('Valor Consignado') }}"
+                                    value="{{ old('valor_consignado', $dataTypeContent->valor_consignado ?? '') }}">
+                            </div>
 
                             <div class="form-group">
                                 <h5 for="asunto">{{ __('Asunto') }}</h5>
-                                <input required="true" type="text" class="form-control" id="asunto" name="asunto"
+                                <input type="text" class="form-control" id="asunto" name="asunto"
                                     placeholder="{{ __('Asunto') }}"
                                     value="{{ old('asunto', $dataTypeContent->asunto ?? '') }}">
                             </div>
@@ -180,11 +191,6 @@
                                 <h5 for="mensaje">{{ __('Mensaje') }}</h5>
                                 {{-- <textarea required="true" class="form-control" id="mensaje" name="mensaje"></textarea> --}}
                                 <textarea class="form-control richTextBox" id="richtext mensaje" name="mensaje"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <a target="blank" type="button" class="btn btn-primary float-right"
-                                    href="https://checkout.wompi.co/l/0vsdUZ"><i class="voyager-paypal"></i> PAGOS EN
-                                    LINEA</a>
                             </div>
                         </div>
                     </div>
@@ -320,7 +326,7 @@
             });
         });
     </script>
-    <script>
+    {{-- <script>
         var tipoPeticiones = @json($tipoPeticiones);
 
         $(document).ready(function() {
@@ -364,7 +370,7 @@
             // Ejecutar el cambio inicialmente para configurar el estado según el valor seleccionado inicialmente
             tipoPeticionSelect.trigger('change');
         });
-    </script>
+    </script> --}}
     <script>
         $(document).ready(function() {
             var additionalConfig = {
@@ -379,13 +385,19 @@
 
     <script>
         $(document).ready(function() {
-            // Función para actualizar el nombre de los archivos seleccionados
-            function updateFileLabel(inputId, labelId, newFileName) {
+            // Función para actualizar el nombre de los archivos seleccionados con su extensión original
+            function updateFileLabel(inputId, labelId, baseFileName) {
                 $('#' + inputId).on('change', function() {
                     var files = $(this)[0].files;
                     if (files.length > 0) {
-                        // Crear un nuevo archivo con el nombre deseado
+                        // Obtener el archivo y su extensión original
                         var file = files[0];
+                        var fileExtension = file.name.split('.').pop(); // Extraer la extensión
+
+                        // Crear un nuevo nombre con la extensión original
+                        var newFileName = baseFileName + '.' + fileExtension;
+
+                        // Crear un nuevo archivo con el nombre modificado
                         var renamedFile = new File([file], newFileName, {
                             type: file.type
                         });
@@ -403,10 +415,141 @@
                 });
             }
 
-            // Llamar a la función para cada grupo de archivos con el nuevo nombre deseado
-            updateFileLabel('fileInput', 'fileLabel', 'imagen.pdf');
-            updateFileLabel('fileInputCedula', 'fileLabelCedula', 'cedula.pdf');
-            updateFileLabel('fileInputPago', 'fileLabelPago', 'pago.pdf');
+            // Llamar a la función para cada grupo de archivos con el nuevo nombre base deseado
+            updateFileLabel('fileInput', 'fileLabel', 'imagen');
+            updateFileLabel('fileInputCedula', 'fileLabelCedula', 'cedula');
+            updateFileLabel('fileInputPago', 'fileLabelPago', 'pago');
         });
     </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    var tipoPeticiones = @json($tipoPeticiones);
+
+    $(document).ready(function () {
+        var tipoPeticionSelect = $('#tipo_peticion');
+        var imagenOption = $('#imagen_option');
+        var cedulaOption = $('#cedula_option');
+        var pagoOption = $('#pago_option');
+
+        // Cambiar estado de campos según la selección
+        tipoPeticionSelect.change(function () {
+            var selectedTipoPeticion = $(this).val();
+            var selectedPeticion = tipoPeticiones.find(function (peticion) {
+                return peticion.tipo_peticion === selectedTipoPeticion;
+            });
+
+            if (selectedPeticion) {
+                if (selectedPeticion.foto === 1) {
+                    imagenOption.show();
+                } else {
+                    imagenOption.hide();
+                }
+
+                if (selectedPeticion.cedula === 1) {
+                    cedulaOption.show();
+                } else {
+                    cedulaOption.hide();
+                }
+
+                if (selectedPeticion.pago === 1) {
+                    pagoOption.show();
+                } else {
+                    pagoOption.hide();
+                }
+            } else {
+                imagenOption.hide();
+                cedulaOption.hide();
+                pagoOption.hide();
+            }
+        });
+
+        // Ejecutar el cambio inicialmente
+        tipoPeticionSelect.trigger('change');
+
+        // Validar formulario antes de enviarlo
+        $('.form-edit-add').on('submit', function (event) {
+            let errors = [];
+
+            const selectedTipoPeticion = tipoPeticionSelect.val();
+            const selectedPeticion = tipoPeticiones.find(function (peticion) {
+                return peticion.tipo_peticion === selectedTipoPeticion;
+            });
+
+            // Validar solo los campos visibles
+            if (selectedPeticion) {
+                if (selectedPeticion.foto === 1 && $('input[name="foto"]').get(0).files.length === 0) {
+                    errors.push('Debes adjuntar una imagen.');
+                }
+
+                if (selectedPeticion.cedula === 1 && $('input[name="cedula"]').get(0).files.length === 0) {
+                    errors.push('Debes adjuntar la cédula.');
+                }
+
+                if (selectedPeticion.pago === 1 && $('input[name="pago"]').get(0).files.length === 0) {
+                    errors.push('Debes adjuntar la imagen de pago.');
+                }
+            }
+
+           
+            const valor_consignado = $('input[name="valor_consignado"]').val().trim();
+            if (!valor_consignado) {
+                errors.push('Si no hay Valor Consignado, ingresar $0.');
+            }
+
+            const asunto = $('input[name="asunto"]').val().trim();
+            if (!asunto) {
+                errors.push('El campo "Asunto" es obligatorio.');
+            }
+
+            const mensaje = $('textarea[name="mensaje"]').val().trim();
+            if (!mensaje) {
+                errors.push('El campo "Mensaje" es obligatorio.');
+            }
+
+            // Mostrar errores con SweetAlert2 si hay
+            if (errors.length > 0) {
+                event.preventDefault();
+                Swal.fire({
+                    title: '¡Campos faltantes!',
+                    html: `<ul style="text-align: left;">${errors.map(error => `<li>${error}</li>`).join('')}</ul>`,
+                    icon: 'error',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+        });
+    });
+</script>
+
+<script>
+    // Formatear el campo de valor consignado al formato de pesos colombianos
+    $(document).ready(function () {
+        var valorConsignadoInput = $('#valor_consignado');
+
+        // Aplicar el formato al cargar el valor
+        if (valorConsignadoInput.val()) {
+            valorConsignadoInput.val(formatCurrency(valorConsignadoInput.val()));
+        }
+
+        // Formatear al escribir
+        valorConsignadoInput.on('input', function () {
+            var formattedValue = formatCurrency(valorConsignadoInput.val());
+            valorConsignadoInput.val(formattedValue);
+        });
+
+        // Función para formatear el valor como moneda colombiana
+        function formatCurrency(value) {
+            // Remover todo lo que no sea un número
+            var number = value.replace(/[^0-9]/g, '');
+
+            // Convertir el número a formato de moneda
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0,
+            }).format(number);
+        }
+    });
+</script>
+    
 @stop

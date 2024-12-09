@@ -18,6 +18,7 @@ class CheckProfileComplete
     {
         $user = Auth::user();
 
+
         // Obtener el nombre de la ruta actual
         $currentRoute = $request->route() ? $request->route()->getName() : null;
 

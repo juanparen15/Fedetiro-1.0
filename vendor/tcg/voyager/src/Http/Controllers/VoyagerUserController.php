@@ -35,25 +35,25 @@ class VoyagerUserController extends VoyagerBaseController
             'id' => 'required|exists:users,id',
             'isActive' => 'required|boolean',
         ]);
-    
+
         $user = User::find($request->id);
-    
+
         if ($user) {
             $user->isActive = $request->isActive;
             $user->save();
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Estado actualizado correctamente.'
             ]);
         }
-    
+
         return response()->json([
             'success' => false,
             'message' => 'No se pudo actualizar el estado.'
         ], 400);
     }
-    
+
     public function profile(Request $request)
     {
         $route = '';
@@ -105,11 +105,15 @@ class VoyagerUserController extends VoyagerBaseController
         // Obtener el usuario que se va a actualizar
         $user = User::findOrFail($id);
 
+        if (!$request->has('isActive')) {
+            $request->merge(['isActive' => $user->isActive ?? 0]);
+        }
+
         // Actualizar los datos del usuario
         // $user->update($request->all());
         // Obtener los datos del formulario
         if (!auth()->user()) {
-        $user->documento_tercero = $user->username;
+            $user->documento_tercero = $user->username;
         }
 
         $formData = $request->all();

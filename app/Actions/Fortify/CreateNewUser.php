@@ -2,10 +2,12 @@
 
 namespace App\Actions\Fortify;
 
+use App\Mail\nuevo_usuario;
+use App\Models\ArmorumappInfodeportistum;
 use App\Models\User;
-use App\Notifications\CustomVerifyEmailNotification;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Jetstream\Jetstream;
@@ -24,7 +26,6 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             'tipo_documento' => ['required', 'integer', 'exists:tipo_documentos,id'],
             'username' => ['required', 'regex:/^[0-9]+$/', 'string', 'max:255', 'min:4', 'unique:users'],
-            // 'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'password' => $this->passwordRules(),
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
@@ -35,15 +36,32 @@ class CreateNewUser implements CreatesNewUsers
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
         ])->validate();
 
-        return User::create([
+        // Crear el usuario
+        $user = User::create([
             'tipo_documento' => $input['tipo_documento'],
             'username' => $input['username'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
         ]);
 
-        // event(new Registered($user));
+        // $info_deportista = new ArmorumappInfodeportistum();
 
-        // return $user;
+        $info_deportista = ArmorumappInfodeportistum::where('documento_tercero', $user->username)->first();
+
+        if (!$info_deportista) {
+            Log::error('No se encontró información en info_deportista para el username: ' . $user->username);
+            return back()->withErrors(['No se pudo encontrar información para este usuario.']);
+        }
+        
+        try {
+            Mail::to($user->email)->send(new nuevo_usuario($info_deportista, $user));
+        } catch (\Exception $e) {
+            Log::error('Error al enviar el correo: ' . $e->getMessage());
+            return back()->withErrors(['message' => 'Hubo un error al enviar el correo.']);
+        }
+        
+
+        // Devolver el usuario creado
+        return $user;
     }
 }

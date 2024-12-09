@@ -37,7 +37,7 @@ Route::post('/email/verification-notification', 'App\Http\Controllers\Auth\Verif
     ->name('verification.send');
 
 // Dashboard route requires authentication and email verification
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified', 'check_active'])->group(function () {
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
     Route::get('/admin', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -50,7 +50,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
 
 // Define las rutas de Voyager con middleware
 Route::group(['prefix' => 'admin'], function () {
-    Route::middleware(['auth', 'verified', 'check_active'])->group(function () {
+    Route::middleware(['auth', 'verified'])->group(function () {
         Voyager::routes();
     });
 });

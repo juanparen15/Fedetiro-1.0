@@ -7,17 +7,20 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class solicitud_recibida extends Mailable
 {
     use Queueable, SerializesModels;
 
 
-    protected $solicitud;
-    protected $usuario;
+    public $solicitud;
+    public $usuario;
 
     /**
      * Create a new notification instance.
@@ -36,13 +39,12 @@ class solicitud_recibida extends Mailable
      */
     public function build()
     {
-        $usuario = $this->usuario;
 
-        return $this->subject('Solicitud de Trámite')
-            ->view('emails.solicitud-recibida', [
-                'usuario' => $usuario,
-                'solicitud' => $this->solicitud
-            ]);
+        $mailMessage = $this->subject('SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . $this->usuario->movil . ')')
+            ->markdown('emails.solicitud-recibida')
+            ->withAttachments($this->attachments());
+
+        return $mailMessage;
     }
 
     /**
@@ -51,7 +53,7 @@ class solicitud_recibida extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Solicitud de Trámite Recibida',
+            subject: 'SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . $this->usuario->movil . ')',
         );
     }
 
@@ -64,14 +66,68 @@ class solicitud_recibida extends Mailable
             view: 'emails.solicitud-recibida',
         );
     }
-
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return \Illuminate\Mail\Mailables\Attachment[]
      */
     public function attachments(): array
     {
-        return [];
+        $attachments = [];
+
+        // Consentimiento de padres
+        if (!empty($this->solicitud->foto)) {
+            $anexo_pdf = json_decode($this->solicitud->foto, true);
+            if (is_array($anexo_pdf)) {
+                foreach ($anexo_pdf as $archivo) {
+                    $attachments[] = Attachment::fromStorageDisk('public', $archivo['download_link'])
+                        ->as($archivo['original_name']);
+                }
+            } else {
+                $attachments[] = Attachment::fromStorageDisk('public', $this->solicitud->foto);
+            }
+        }
+
+        // Comprobante de pago
+        if (!empty($this->solicitud->cedula)) {
+            $anexo_jpg = json_decode($this->solicitud->cedula, true);
+            if (is_array($anexo_jpg)) {
+                foreach ($anexo_jpg as $archivo) {
+                    $attachments[] = Attachment::fromStorageDisk('public', $archivo['download_link'])
+                        ->as($archivo['original_name']);
+                }
+            } else {
+                $attachments[] = Attachment::fromStorageDisk('public', $this->solicitud->cedula);
+            }
+        }
+        // Permiso de porte
+        if (!empty($this->solicitud->pago)) {
+            $anexo_mp3 = json_decode($this->solicitud->pago, true);
+            if (is_array($anexo_mp3)) {
+                foreach ($anexo_mp3 as $archivo) {
+                    $attachments[] = Attachment::fromStorageDisk('public', $archivo['download_link'])
+                        ->as($archivo['original_name']);
+                }
+            } else {
+                $attachments[] = Attachment::fromStorageDisk('public', $this->solicitud->pago);
+            }
+        }
+
+        if (!empty($this->solicitud->otro_archivo)) {
+            $anexo_opcional_pdf = json_decode($this->solicitud->otro_archivo, true);
+            if (is_array($anexo_opcional_pdf)) {
+                foreach ($anexo_opcional_pdf as $archivo) {
+                    $attachments[] = Attachment::fromStorageDisk('public', $archivo['download_link'])
+                        ->as($archivo['original_name']);
+                }
+            } else {
+                $attachments[] = Attachment::fromStorageDisk('public', $this->solicitud->otro_archivo);
+            }
+        }
+
+        // Log::info('Archivos adjuntos procesados: ', $attachments);
+
+
+        return $attachments;
     }
 }

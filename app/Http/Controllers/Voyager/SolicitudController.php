@@ -14,6 +14,8 @@ use TCG\Voyager\Http\Controllers\VoyagerBaseController;
 use Exception;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use TCG\Voyager\Database\Schema\SchemaManager;
 use TCG\Voyager\Events\BreadDataAdded;
 use TCG\Voyager\Events\BreadDataDeleted;
@@ -24,8 +26,6 @@ use TCG\Voyager\Http\Controllers\Traits\BreadRelationshipParser;
 
 class SolicitudController extends VoyagerBaseController
 {
-
-
     public function store(Request $request)
     {
         $slug = $this->getSlug($request);
@@ -41,25 +41,65 @@ class SolicitudController extends VoyagerBaseController
 
         event(new BreadDataAdded($dataType, $data));
 
+        // Datos del usuario autenticado
+        $user = Auth::user();
+
         // Validar y guardar la solicitud
         $solicitud = new ArmorumappSolicitud();
+
+        $usuario = $request->user();
+
         $solicitud->tipo_peticion = $request->tipo_peticion;
         $solicitud->asunto = $request->asunto;
         $solicitud->mensaje = $request->mensaje;
         // Aquí guarda las imágenes si es necesario
+        $currentMonth = now()->format('FY'); // Ejemplo: 'September_2024'
+        $directory = "armorumapp-solicitud/{$currentMonth}";
 
-        $usuario = $request->user();
+        // Crear la carpeta si no existe
+        if (!Storage::disk('public')->exists($directory)) {
+            Storage::disk('public')->makeDirectory($directory);
+        }
+
+        // Manejo de archivos adjuntos
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $fileName = $file->getClientOriginalName();
+            $solicitud->foto = $file->storeAs($directory, $fileName, 'public');
+        }
+
+        if ($request->hasFile('cedula')) {
+            $file = $request->file('cedula');
+            $fileName = $file->getClientOriginalName();
+            $solicitud->cedula = $file->storeAs($directory, $fileName, 'public');
+        }
+
+        if ($request->hasFile('pago')) {
+            $file = $request->file('pago');
+            $fileName = $file->getClientOriginalName();
+            $solicitud->pago = $file->storeAs($directory, $fileName, 'public');
+        }
+
+        if ($request->hasFile('otro_archivo')) {
+            $file = $request->file('otro_archivo');
+            $fileName = $file->getClientOriginalName();
+            $solicitud->otro_archivo = $file->storeAs($directory, $fileName, 'public');
+        }
+
         try {
-            // Mail::to($usuario->email)->send(new solicitud_recibida($solicitud, $usuario));
-            // Enviar la notificación al usuario
-            $usuario->notify(new SolicitudRecibida($solicitud, $usuario));
+            Mail::to($user->email)->send(new solicitud_recibida($solicitud, $user));
         } catch (\Exception $e) {
-            // Manejar el error si ocurre
+            // Registra el error en los logs
+            Log::error('Error al enviar el correo: ' . $e->getMessage(), ['exception' => $e]);
+
+            // Devuelve un mensaje de error al usuario
             return back()->with([
-                'message'    => __('voyager::generic.error_added_new') . " {$dataType->getTranslatedAttribute('display_name_singular')}",
+                'message'    => __('voyager::generic.error_added_new') . " {$dataType->getTranslatedAttribute('display_name_singular')} - Error: " . $e->getMessage(),
                 'alert-type' => 'danger',
             ]);
         }
+
+
 
         // Redireccionar u hacer lo que sea necesario después de guardar la solicitud
         if (!$request->has('_tagging')) {

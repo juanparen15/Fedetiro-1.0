@@ -72,19 +72,23 @@
                                         placeholder="{{ __('Correo') }}"
                                         value="{{ old('email', $dataTypeContent->email ?? '') }}">
                                 </div>
+                            @endcan
 
-                                <div class="form-group">
+                            <div class="form-group">
+                                @can('editRoles', $dataTypeContent)
                                     <h5>{{ __('¿Usuario Activo?') }}</h5>
                                     <div class="toggle-user-switch">
                                         <input type="checkbox" id="isActive" name="isActive"
-                                            {{ old('isActive', $dataTypeContent->isActive ?? '') == '1' ? 'checked' : '' }}>
+                                            {{ old('isActive', $dataTypeContent->isActive ?? '1') == '1' ? 'checked' : '' }}>
                                     </div>
-                                </div>
-                            @endcan
+                                @endcan
+                            </div>
+
                             @if (Auth::user()->role_id == '2')
                                 <div class="form-group">
                                     <h5 for="documento_tercero">{{ __('Número de Documento') }}</h5>
-                                    <label for="documento_tercero">{{ old('username', $dataTypeContent->username ?? '') }}</label>
+                                    <label
+                                        for="documento_tercero">{{ old('username', $dataTypeContent->username ?? '') }}</label>
                                 </div>
                             @endif
                             <div class="form-group">
@@ -471,7 +475,8 @@
                             <div class="form-group">
                                 <h5 for="documento_tercero">{{ __('Número de Documento') }}</h5>
                             </div>
-                            <label for="documento_tercero">{{ old('username', $dataTypeContent->username ?? '') }}</label>
+                            <label
+                                for="documento_tercero">{{ old('username', $dataTypeContent->username ?? '') }}</label>
                             <br></br>
                             <div class="form-group">
                                 <h5 for="primer_nombre">{{ __('Nombre Completo') }}</h5>
@@ -549,47 +554,47 @@
         });
     </script>
 
-<script>
-    $(document).ready(function() {
-        $('.toggle-switch input[type="checkbox"]').bootstrapToggle({
-            on: '{{ __('SI') }}',
-            off: '{{ __('NO') }}',
-            size: 'small', // Puedes ajustar el tamaño aquí
-            onstyle: 'success', // Estilo para "SI"
-            offstyle: 'danger' // Estilo para "NO"
+    <script>
+        $(document).ready(function() {
+            $('.toggle-user-switch input[type="checkbox"]').bootstrapToggle({
+                on: '{{ __('SI') }}',
+                off: '{{ __('NO') }}',
+                size: 'small', // Puedes ajustar el tamaño aquí
+                onstyle: 'success', // Estilo para "SI"
+                offstyle: 'danger' // Estilo para "NO"
+            });
         });
-    });
-</script>
+    </script>
 
-{{-- <script>
-    $(document).on('change', '.toggle-user-active', function() {
-        let userId = $(this).data('id'); // ID del usuario
-        let isActive = $(this).is(':checked') ? 1 : 0; // Estado activo/inactivo
+    <script>
+        $(document).on('change', '.toggle-user-active', function() {
+            let userId = $(this).data('id'); // ID del usuario
+            let isActive = $(this).is(':checked') ? 1 : 0; // Estado activo/inactivo
 
-        $.ajax({
-            url: "{{ route('voyager.users.toggleActive') }}", // Ruta definida en Laravel
-            type: 'POST', // Método HTTP
-            headers: { // Encabezados necesarios
-                'X-CSRF-TOKEN': '{{ csrf_token() }}', // Token CSRF
-            },
-            data: { // Datos enviados al servidor
-                id: userId,
-                isActive: isActive
-            },
-            success: function(response) {
-                if (response.success) {
-                    toastr.success(response.message); // Mensaje de éxito
-                } else {
-                    toastr.error(response.message); // Mensaje de error
+            $.ajax({
+                url: "{{ route('voyager.users.toggleActive') }}", // Ruta definida en Laravel
+                type: 'POST', // Método HTTP
+                headers: { // Encabezados necesarios
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}', // Token CSRF
+                },
+                data: { // Datos enviados al servidor
+                    id: userId,
+                    isActive: isActive
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message); // Mensaje de éxito
+                    } else {
+                        toastr.error(response.message); // Mensaje de error
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error); // Log de error en consola
+                    toastr.error('Ocurrió un error al actualizar el estado.');
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error); // Log de error en consola
-                toastr.error('Ocurrió un error al actualizar el estado.');
-            }
+            });
         });
-    });
-</script> --}}
+    </script>
 
 
 

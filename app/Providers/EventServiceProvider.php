@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Listeners\LogoutInactiveUser;
 use App\Models\ArmorumappSolicitud;
 use App\Models\Inscripcion;
 use App\Observers\ArmorumappSolicitudObserver;
