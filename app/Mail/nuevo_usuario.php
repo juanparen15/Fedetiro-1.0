@@ -22,7 +22,7 @@ class nuevo_usuario extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(ArmorumappInfodeportistum $info_deportista, User $usuario)
+    public function __construct(User $usuario, ArmorumappInfodeportistum $info_deportista)
     {
         $this->usuario = $usuario;
         $this->info_deportista = $info_deportista;

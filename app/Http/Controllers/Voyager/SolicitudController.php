@@ -51,6 +51,7 @@ class SolicitudController extends VoyagerBaseController
         $usuario = $request->user();
 
         $solicitud->tipo_peticion = $request->tipo_peticion;
+        $solicitud->valor_consignado = $request->valor_consignado;
         $solicitud->asunto = $request->asunto;
         $solicitud->mensaje = $request->mensaje;
         // Aquí guarda las imágenes si es necesario
@@ -100,8 +101,8 @@ class SolicitudController extends VoyagerBaseController
         $adminEmail = Voyager::setting('admin.correo', 'deseosecreto92@gmail.com');
 
         try {
-            Mail::to($adminEmail)->send(new solicitud_recibida($solicitud, $user, $info_deportista));
-            Mail::to($user->email)->send(new solicitud_recibida($solicitud, $user, $info_deportista));
+            Mail::to($adminEmail)->send(new solicitud_recibida($user, $solicitud, $info_deportista));
+            Mail::to($user->email)->send(new solicitud_recibida($user, $solicitud, $info_deportista));
         } catch (\Exception $e) {
             // Registra el error en los logs
             Log::error('Error al enviar el correo: ' . $e->getMessage(), ['exception' => $e]);

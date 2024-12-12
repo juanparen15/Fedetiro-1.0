@@ -497,14 +497,14 @@
                 errors.push('Si no hay Valor Consignado, ingresar $0.');
             }
 
-            const asunto = $('input[name="asunto"]').val().trim();
-            if (!asunto) {
-                errors.push('El campo "Asunto" es obligatorio.');
-            }
-
             const mensaje = $('textarea[name="mensaje"]').val().trim();
             if (!mensaje) {
                 errors.push('El campo "Mensaje" es obligatorio.');
+            }
+
+            const asunto = $('input[name="asunto"]').val().trim();
+            if (!asunto) {
+                errors.push('El campo "Asunto" es obligatorio.');
             }
 
             // Mostrar errores con SweetAlert2 si hay
@@ -543,11 +543,11 @@
             var number = value.replace(/[^0-9]/g, '');
 
             // Convertir el número a formato de moneda
-            return new Intl.NumberFormat('es-CO', {
-                style: 'currency',
-                currency: 'COP',
+            var formattedNumber = new Intl.NumberFormat('es-CO', {
                 minimumFractionDigits: 0,
             }).format(number);
+
+            return formattedNumber;
         }
     });
 </script>

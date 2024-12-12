@@ -10,10 +10,12 @@ use Illuminate\Support\Facades\Auth;
 class ArmorumappSolicitud extends Model
 {
     use HasFactory;
+    
     protected $table = 'armorumapp_solicitud';
     protected $fillable = [
-        // Otros campos fillable que puedas tener
-        'documento_tercero', 'tipo_peticion',
+        'documento_tercero',
+        'tipo_peticion',
+        'valor_consignado',
     ];
 
     public function scopeCurrentUser($query)

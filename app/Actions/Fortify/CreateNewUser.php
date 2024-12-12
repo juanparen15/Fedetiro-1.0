@@ -46,20 +46,27 @@ class CreateNewUser implements CreatesNewUsers
 
         // $info_deportista = new ArmorumappInfodeportistum();
 
+        // if (!$info_deportista) {
+        //     Log::error('No se encontró información en info_deportista para el username: ' . $user->username);
+        //     return back()->withErrors(['No se pudo encontrar información para este usuario.']);
+        // }
+
         $info_deportista = ArmorumappInfodeportistum::where('documento_tercero', $user->username)->first();
 
-        if (!$info_deportista) {
-            Log::error('No se encontró información en info_deportista para el username: ' . $user->username);
-            return back()->withErrors(['No se pudo encontrar información para este usuario.']);
+        // Verificar si la información del deportista existe
+        if ($info_deportista === null) {
+            // Puedes registrar el error o asignar un valor por defecto
+            Log::warning('No se encontró la información del deportista para el usuario: ' . $user->username);
+            // Asignar un valor predeterminado (vacío o un objeto vacío)
+            $info_deportista = new ArmorumappInfodeportistum();
         }
-        
+
         try {
-            Mail::to($user->email)->send(new nuevo_usuario($info_deportista, $user));
+            Mail::to($user->email)->send(new nuevo_usuario($user, $info_deportista));
         } catch (\Exception $e) {
             Log::error('Error al enviar el correo: ' . $e->getMessage());
-            return back()->withErrors(['message' => 'Hubo un error al enviar el correo.']);
+            // return back()->withErrors(['message' => 'Hubo un error al enviar el correo.']);
         }
-        
 
         // Devolver el usuario creado
         return $user;

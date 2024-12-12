@@ -8,7 +8,7 @@ Se ha recepcionado a través de la Ventanilla Única Virtual una solicitud con l
 - Fecha de Solicitud: {{ now()->format('d-m-Y \a \l\a\s H:i:s') }}
 - Tipo petición: {{ $solicitud->tipo_peticion }}
 - Asunto: {{ $solicitud->asunto }}
-- Valor Consignado {{ $solicitud->valor_consignado }}
+- Valor Consignado: ${{ $solicitud->valor_consignado ?? '$0' }}
 - Mensaje: {!! $solicitud->mensaje !!}
 {{-- - Mensaje: {{ $solicitud->mensaje }} --}}
 

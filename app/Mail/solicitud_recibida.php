@@ -20,21 +20,19 @@ class solicitud_recibida extends Mailable
     use Queueable, SerializesModels;
 
 
-    public $solicitud;
     public $usuario;
+    public $solicitud;
     public $info_deportista;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(ArmorumappSolicitud $solicitud, User $usuario, ArmorumappInfodeportistum $info_deportista)
+    public function __construct(User $usuario, ArmorumappSolicitud $solicitud, ArmorumappInfodeportistum $info_deportista)
     {
-        $this->solicitud = $solicitud;
         $this->usuario = $usuario;
+        $this->solicitud = $solicitud;
         $this->info_deportista = $info_deportista;
     }
-    
-
 
     /**
      * Build the message.
@@ -44,7 +42,7 @@ class solicitud_recibida extends Mailable
     public function build()
     {
 
-        $mailMessage = $this->subject('SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . '$' . $this->solicitud->valor_consignado . ')')
+        $mailMessage = $this->subject('SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // ( $' . $this->solicitud->valor_consignado . ' )')
             ->markdown('emails.solicitud-recibida')
             ->withAttachments($this->attachments());
 
@@ -57,7 +55,7 @@ class solicitud_recibida extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'SOLICITUD DE TRÁMITE // (' . $this->usuario->username . ') // (' . '$' . $this->solicitud->valor_consignado . ')',
+            subject: 'SOLICITUD DE TRÁMITE // ( ' . $this->usuario->username . ' ) // ( $' . $this->solicitud->valor_consignado . ' )',
         );
     }
 
