@@ -189,8 +189,8 @@
 
                             <div class="form-group">
                                 <h5 for="mensaje">{{ __('Mensaje') }}</h5>
-                                {{-- <textarea required="true" class="form-control" id="mensaje" name="mensaje"></textarea> --}}
-                                <textarea class="form-control richTextBox" id="richtext mensaje" name="mensaje"></textarea>
+                                <textarea class="form-control" id="richtext mensaje" name="mensaje"></textarea>
+                                {{-- <textarea required="true"  class="form-control richTextBox" id="richtext mensaje" name="mensaje"></textarea> --}}
                             </div>
                         </div>
                     </div>
@@ -497,14 +497,15 @@
                 errors.push('Si no hay Valor Consignado, ingresar $0.');
             }
 
-            const mensaje = $('textarea[name="mensaje"]').val().trim();
-            if (!mensaje) {
-                errors.push('El campo "Mensaje" es obligatorio.');
-            }
-
+        
             const asunto = $('input[name="asunto"]').val().trim();
             if (!asunto) {
                 errors.push('El campo "Asunto" es obligatorio.');
+            }
+
+            const mensaje = $('textarea[name="mensaje"]').val().trim();
+            if (!mensaje) {
+                errors.push('El campo "Mensaje" es obligatorio.');
             }
 
             // Mostrar errores con SweetAlert2 si hay

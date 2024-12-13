@@ -105,9 +105,9 @@ class VoyagerUserController extends VoyagerBaseController
         // Obtener el usuario que se va a actualizar
         $user = User::findOrFail($id);
 
-        if (!$request->has('isActive')) {
-            $request->merge(['isActive' => $user->isActive ?? 0]);
-        }
+        // if (!$request->has('isActive')) {
+        //     $request->merge(['isActive' => $user->isActive ?? 0]);
+        // }
 
         // Actualizar los datos del usuario
         // $user->update($request->all());
