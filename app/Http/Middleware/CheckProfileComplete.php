@@ -64,6 +64,8 @@ class CheckProfileComplete
             !is_null($user->movil) &&
             !is_null($user->direccion) &&
             !is_null($user->fecha_nacimiento) &&
+            !is_null($user->departamentos) &&
+            !is_null($user->municipios) &&
             !is_null($user->peso) &&
             !is_null($user->altura) &&
             !is_null($user->entrenador_personal) &&
@@ -73,6 +75,8 @@ class CheckProfileComplete
             !is_null($user->medico_tramitante) &&
             !is_null($user->lugar_entrenamiento) &&
             !is_null($user->estado_civil) &&
+            !is_null($user->tipo_arma) &&
+            !is_null($user->modalidad_arma) &&
             !is_null($user->genero);
     }
 }

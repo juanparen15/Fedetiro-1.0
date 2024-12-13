@@ -23,7 +23,6 @@ class User extends \TCG\Voyager\Models\User implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
-        // 'primer_nombre',
         'tipo_documento',
         'username',
         'email',
@@ -105,26 +104,37 @@ class User extends \TCG\Voyager\Models\User implements MustVerifyEmail
     //     });
     // }
 
+    public function getIsAdminAttribute()
+    {
+        return $this->role_id === 1; // Ajusta el ID de administrador según tu configuración.
+    }
+
+
     protected static function boot()
-{
-    parent::boot();
+    {
+        parent::boot();
 
-    // Utiliza el evento creating para establecer el campo documento_tercero
-    static::creating(function ($user) {
-        // Si el usuario autenticado NO es administrador, establece el valor del campo documento_tercero como el nombre de usuario
-        if (!auth()->user() || !auth()->user()->is_admin) {
-            $user->documento_tercero = $user->username;
-        }
-    });
+        // Utiliza el evento creating para establecer el campo documento_tercero
+        static::creating(function ($user) {
+            // Si el usuario autenticado NO es administrador, establece el valor del campo documento_tercero como el nombre de usuario
+            if (!auth()->user() || !auth()->user()->is_admin) {
+                $user->documento_tercero = $user->username;
+            }
+        });
 
-    // Utiliza el evento updating para evitar que el administrador modifique el campo documento_tercero
-    static::updating(function ($user) {
-        // Si el usuario autenticado es administrador, no modificar ni borrar el campo documento_tercero
-        if (!auth()->user() || !auth()->user()->is_admin) {
-            $user->documento_tercero = $user->username;
-        }
-    });
-}
+        // Utiliza el evento updating para evitar que el administrador modifique el campo documento_tercero
+        static::updating(function ($user) {
+            // Si el usuario autenticado es administrador, no modificar ni borrar el campo documento_tercero
+            if (!auth()->user() || !auth()->user()->is_admin) {
+                $user->documento_tercero = $user->username;
+            }
+        });
+    }
+
+    public function findForAuth($username)
+    {
+        return $this->where('username', $username)->first();
+    }
 
 
     public function getAgeAttribute()

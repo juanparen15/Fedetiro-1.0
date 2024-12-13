@@ -26,7 +26,7 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             'tipo_documento' => ['required', 'integer', 'exists:tipo_documentos,id'],
             'username' => ['required', 'regex:/^[0-9]+$/', 'string', 'max:255', 'min:4', 'unique:users'],
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => $this->passwordRules(),
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ], [
@@ -36,7 +36,6 @@ class CreateNewUser implements CreatesNewUsers
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
         ])->validate();
 
-        // Crear el usuario
         $user = User::create([
             'tipo_documento' => $input['tipo_documento'],
             'username' => $input['username'],
@@ -53,11 +52,8 @@ class CreateNewUser implements CreatesNewUsers
 
         $info_deportista = ArmorumappInfodeportistum::where('documento_tercero', $user->username)->first();
 
-        // Verificar si la información del deportista existe
         if ($info_deportista === null) {
-            // Puedes registrar el error o asignar un valor por defecto
             Log::warning('No se encontró la información del deportista para el usuario: ' . $user->username);
-            // Asignar un valor predeterminado (vacío o un objeto vacío)
             $info_deportista = new ArmorumappInfodeportistum();
         }
 
@@ -68,7 +64,6 @@ class CreateNewUser implements CreatesNewUsers
             // return back()->withErrors(['message' => 'Hubo un error al enviar el correo.']);
         }
 
-        // Devolver el usuario creado
         return $user;
     }
 }

@@ -29,7 +29,7 @@
                 <div class="col-md-5">
                     <div class="panel panel-bordered">
                         {{-- <div class="panel"> --}}
-                        @if (count($errors) > 0)
+                        {{-- @if (count($errors) > 0)
                             <div class="alert alert-danger">
                                 <ul>
                                     @foreach ($errors->all() as $error)
@@ -37,7 +37,7 @@
                                     @endforeach
                                 </ul>
                             </div>
-                        @endif
+                        @endif --}}
 
                         <div class="panel-body">
                             @php
@@ -215,7 +215,7 @@
                 <div class="col-md-5">
                     <div class="panel panel-bordered">
                         {{-- <div class="panel"> --}}
-                        @if (count($errors) > 0)
+                        {{-- @if (count($errors) > 0)
                             <div class="alert alert-danger">
                                 <ul>
                                     @foreach ($errors->all() as $error)
@@ -223,7 +223,7 @@
                                     @endforeach
                                 </ul>
                             </div>
-                        @endif
+                        @endif --}}
 
                         <div class="panel-body">
                             @php
@@ -655,7 +655,7 @@
                         $('#club').val($('#club option:first').val());
                     });
                 } else {
-                    // Si no se selecciona ningun departamento, limpia la lista de municipios
+                    // Si no se selecciona ninguna liga, limpia la lista de clubes
                     $('#club').empty();
                 }
             });
@@ -681,6 +681,71 @@
                     modalidadArma.empty();
                 }
             });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+        document.querySelector('.form-edit-add').addEventListener('submit', function(event) {
+            let formValid = true;
+            let errorMessage = '';
+
+            // Validar campos requeridos estándar
+            const requiredFields = document.querySelectorAll('[required]');
+            requiredFields.forEach((field) => {
+                if (!field.value.trim()) {
+                    formValid = false;
+                    errorMessage += `<li>El campo "${field.name}" es obligatorio.</li>`;
+                }
+            });
+
+            // Validar select dinámicos
+            const dynamicSelects = [{
+                    id: 'departamentos',
+                    label: 'Departamento'
+                },
+                {
+                    id: 'municipios',
+                    label: 'Municipio'
+                },
+                {
+                    id: 'liga',
+                    label: 'Liga'
+                },
+                {
+                    id: 'club',
+                    label: 'Club'
+                },
+                {
+                    id: 'tipo_arma',
+                    label: 'Tipo de Arma'
+                },
+                {
+                    id: 'modalidad_arma',
+                    label: 'Modalidad de Arma'
+                },
+            ];
+
+            dynamicSelects.forEach(select => {
+                const field = document.getElementById(select.id);
+                if (field && (!field.value || field.value === '')) {
+                    formValid = false;
+                    errorMessage += `<li>Debes seleccionar ${select.label}.</li>`;
+                }
+            });
+
+            // Mostrar errores si hay
+            if (!formValid) {
+                event.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: '¡Errores en el formulario!',
+                    html: `<ul style="text-align: left;">${errorMessage}</ul>`,
+                    confirmButtonText: 'Corregir'
+                });
+            }
         });
     </script>
 

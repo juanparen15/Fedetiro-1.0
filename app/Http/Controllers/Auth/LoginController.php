@@ -45,7 +45,7 @@ class LoginController extends Controller
 
         // Si la autenticación falla
         return back()->withErrors([
-            'username' => 'Las credenciales no coinciden.',
+            'username' => 'Estas credenciales no coinciden con nuestros registros o tu cuenta está inactiva.',
         ]);
     }
 

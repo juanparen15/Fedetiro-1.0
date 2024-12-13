@@ -20,7 +20,14 @@ class ResetUserPassword implements ResetsUserPasswords
     {
         Validator::make($input, [
             'password' => $this->passwordRules(),
+            // 'password' => ['required', 'string', 'confirmed', 'min:8'],
         ])->validate();
+
+        User::withoutEvents(function () use ($user, $input) {
+            $user->forceFill([
+                'password' => Hash::make($input['password']),
+            ])->save();
+        });
 
         $user->forceFill([
             'password' => Hash::make($input['password']),
