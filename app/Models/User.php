@@ -29,6 +29,7 @@ class User extends \TCG\Voyager\Models\User implements MustVerifyEmail
         'password',
         'documento_tercero',
         'fecha_nacimiento',
+        'password_temporal',
     ];
 
     /**

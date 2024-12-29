@@ -26,12 +26,15 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             'tipo_documento' => ['required', 'integer', 'exists:tipo_documentos,id'],
             'username' => ['required', 'regex:/^[0-9]+$/', 'string', 'max:255', 'min:4', 'unique:users'],
+            'verify_username' => ['required', 'same:username'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => $this->passwordRules(),
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ], [
             'username.unique' => 'El número de identificación ya está en uso.',
             'username.regex' => 'El número de identificación solo puede contener números.',
+            'verify_username.required' => 'Debe confirmar el número de identificación.',
+            'verify_username.same' => 'El número de identificación no coincide.',
             'email.unique' => 'El correo electrónico ya está en uso.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
         ])->validate();

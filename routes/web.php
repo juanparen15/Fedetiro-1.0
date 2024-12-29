@@ -48,12 +48,21 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 //     Voyager::routes();
 // });
 
+
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+
+Route::get('password/change', [LoginController::class, 'showChangePasswordForm'])->name('password.change');
+Route::post('password/change', [LoginController::class, 'changePassword'])->name('password.update');
+
+
 // Define las rutas de Voyager con middleware
 Route::group(['prefix' => 'admin'], function () {
     Route::middleware(['auth', 'verified'])->group(function () {
         Voyager::routes();
     });
 });
+
 
 // Custom routes for Ajax requests
 Route::get('/get-municipios/{departamento}', 'TCG\Voyager\Http\Controllers\AjaxController@obtener_municipios');
@@ -67,5 +76,3 @@ Route::get('inscripciones/{id}/detalle', [App\Http\Controllers\Voyager\Inscripci
     ->name('voyager.users.toggleActive');
 
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);

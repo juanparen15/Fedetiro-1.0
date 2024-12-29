@@ -164,10 +164,21 @@
                                 </select>
                             </div>
                             <div>
-                                <x-label for="username" value="{{ __('Numero de Identificación') }}" />
+                                <x-label for="username" value="{{ __('Número de Identificación') }}" />
                                 <x-input id="username" class="block mt-1 w-full" type="text" name="username"
                                     :value="old('username')" required autofocus autocomplete="username" pattern="[0-9]*"
                                     oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                            </div>
+
+                            <div>
+                                <x-label for="verify_username"
+                                    value="{{ __('Confirme su Número de Identificación') }}" />
+                                <x-input id="verify_username" class="block mt-1 w-full" type="text"
+                                    name="verify_username" :value="old('verify_username')" required pattern="[0-9]*"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                <p id="username-error" class="text-red-500 text-sm hidden mt-2">
+                                    Los números de identificación no coinciden.
+                                </p>
                             </div>
 
                             <div>
@@ -228,5 +239,25 @@
         </div>
     </div>
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameInput = document.getElementById('username');
+        const verifyUsernameInput = document.getElementById('verify_username');
+        const errorText = document.getElementById('username-error');
+
+        function validateUsernameMatch() {
+            if (usernameInput.value === verifyUsernameInput.value || verifyUsernameInput.value === '') {
+                errorText.classList.add('hidden');
+            } else {
+                errorText.classList.remove('hidden');
+            }
+        }
+
+        // Escucha eventos de entrada en ambos campos
+        usernameInput.addEventListener('input', validateUsernameMatch);
+        verifyUsernameInput.addEventListener('input', validateUsernameMatch);
+    });
+</script>
 
 </html>

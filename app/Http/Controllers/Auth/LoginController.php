@@ -5,48 +5,76 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use TCG\Voyager\Facades\Voyager;
 
 class LoginController extends Controller
 {
-    // Método para mostrar el formulario de inicio de sesión
     public function showLoginForm()
     {
-        return view('vendor.voyager.login'); // Asegúrate de tener la vista auth.login
+        return view('vendor.voyager.login');
     }
 
     public function authenticated(Request $request, $user)
     {
-        // Verificar si el correo electrónico no ha sido confirmado
         if (!$user->hasVerifiedEmail()) {
-            // Redirigir a la página de verificación de email
             return redirect()->route('verification.notice');
         }
 
-        // Redirigir al home si el correo ya está verificado
-        // return redirect()->intended('/');
+        if ($user->password_temporal && Hash::check($request->password, $user->password_temporal)) {
+            return redirect()->route('password.change');
+        }
+
         return redirect()->route('voyager.users.edit', $user->id);
     }
 
-    // Método para el login
     public function login(Request $request)
     {
-        // Validar los campos de inicio de sesión
         $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        // Intentar autenticación con los datos proporcionados
-        if (Auth::attempt(['username' => $request->username, 'password' => $request->password], $request->filled('remember'))) {
-            // Autenticación exitosa
-            $user = Auth::user();
-            return $this->authenticated($request, $user);
-        }
+        $user = \App\Models\User::where('username', $request->username)->first();
 
-        // Si la autenticación falla
+        if ($user) {
+            if ($user->password_temporal && $request->password === $user->password_temporal) {
+                Auth::login($user);
+                return redirect()->route('password.change');
+            } elseif (Auth::attempt(['username' => $request->username, 'password' => $request->password], $request->filled('remember'))) {
+                return redirect()->route('voyager.users.edit', $user->id);
+            } else {
+                return back()->withErrors([
+                    'password' => 'La contraseña proporcionada es incorrecta.',
+                ]);
+            }
+        }
         return back()->withErrors([
             'username' => 'Estas credenciales no coinciden con nuestros registros o tu cuenta está inactiva.',
         ]);
     }
 
+    public function showChangePasswordForm()
+    {
+        return view('auth.change-password');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string|confirmed|min:8',
+        ]);
+
+        $user = Auth::user();
+
+        $user->password = Hash::make($request->password);
+        $user->password_temporal = null;
+        $user->save();
+
+        return redirect()->route('voyager.users.edit', $user->id)->with([
+            'message'    => '¡Contraseña actualizada con éxito!',
+            'alert-type' => 'success',
+        ]);
+    }
 }

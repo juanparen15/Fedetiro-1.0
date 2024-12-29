@@ -139,6 +139,30 @@
                                     <span id="fileLabelPago"></span>
                                 </div>
                             </div>
+                            
+                            {{-- Opción de carga de pago --}}
+                            <div class="form-group" id="pago_option">
+                                <h5 for="pago">{{ __('Pago') }}</h5>
+                                @if (!empty($dataTypeContent->pago))
+                                    @foreach (json_decode($dataTypeContent->pago) as $pdf)
+                                        <div class="file-preview">
+                                            <a href="{{ filter_var($pdf->download_link ?? '', FILTER_VALIDATE_URL) ? $pdf->download_link : Voyager::image($pdf->download_link) }}"
+                                                target="_blank">
+                                                {{ $pdf->original_name ?? basename($pdf->download_link) }}
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                @endif
+                                <div class="custom-file">
+                                    <!-- Botón personalizado -->
+                                    <label class="btn btn-primary" for="fileInputPago"><i class="voyager-images"></i>
+                                        Seleccionar Imagen de Pago</label>
+                                    <!-- Input de archivo oculto -->
+                                    <input type="file" class="custom-file-input" id="fileInputPago" data-name="pago"
+                                        accept="image/*, .pdf" name="pago" style="display: none;">
+                                    <span id="fileLabelPago"></span>
+                                </div>
+                            </div>
 
 
                             {{-- Cargar Una Sola Imagen --}}
